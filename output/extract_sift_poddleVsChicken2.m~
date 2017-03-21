@@ -1,0 +1,81 @@
+% Extract SIFT features for poddle vs. fried chicken image set
+function extract_sift_poddleVsChicken2()
+
+conf.calDir = './' ; % calculating directory
+conf.dataDir = './images/' ; % data (image) directory 
+conf.outDir = './output21/'; % output directory
+conf.prefix = 'sift_pf3' ;
+conf.randSeed = 1 ;
+
+conf.dogPath = fullfile(conf.outDir, [conf.prefix '-framesdog.mat']);
+conf.chickenPath = fullfile(conf.outDir, [conf.prefix '-f.mat']);
+
+randn('state',conf.randSeed) ;
+rand('state',conf.randSeed) ;
+vl_twister('state',conf.randSeed) ;
+
+
+% --------------------------------------------------------------------
+%                                                     Train vocabulary
+% --------------------------------------------------------------------
+
+file = fopen('Mydogtrain.csv');
+imagenames = textscan(file, '%s %*[^\n]');
+fclose(file);
+imagenames = imagenames{:};
+imagenames = imagenames(2:end);
+[nfiles, s] = size(imagenames);
+
+file2 = fopen('Mychickentrain.csv');
+imagenames2 = textscan(file, '%s %*[^\n]');
+fclose(file);
+imagenames2 = imagenames2{:};
+imagenames2 = imagenames2(2:end);
+[nfiles, s2] = size(imagenames2);
+
+% Get some SIFT descriptors to train the dictionary
+descrsDog = {} ;
+frameDog = {};
+for ii = 1:nfiles
+  fprintf('Processing dictionary %s (%.2f %%)\n', imagenames{ii}, 100 * ii /nfiles) ;
+  currentFileName = imagenames{ii};
+  imm = imread(fullfile(conf.dataDir,currentFileName));
+    if length(size(imm)) == 3
+        im = single(rgb2gray(imm));
+    else
+        im = single(imm);
+    end
+    if size(im,1) > 480
+        im = imresize(im, [480 NaN]);
+        fprintf('\tResize.\n');
+    end
+    [frameDog{ii}, descrsDog{ii}] = vl_sift(im, 'PeakThresh', 10,'EdgeThresh',10);
+end
+  
+descrsChicken = {} ;
+frameChicken = {};
+for ii = 1:nfiles
+  fprintf('Processing dictionary %s (%.2f %%)\n', imagenames{ii}, 100 * ii /nfiles) ;
+  currentFileName = imagenames{ii};
+  imm = imread(fullfile(conf.dataDir,currentFileName));
+    if length(size(imm)) == 3
+        im = single(rgb2gray(imm));
+    else
+        im = single(imm);
+    end
+    if size(im,1) > 480
+        im = imresize(im, [480 NaN]);
+        fprintf('\tResize.\n');
+    end
+    [frameChicken{ii}, descrsChicken{ii}] = vl_sift(im, 'PeakThresh', 10,'EdgeThresh',10);
+end
+
+% save the corresponding frames for dog feature visualization
+  framesdog = horzcat(frameDog{:});
+  save('framesdog');
+% save the corresponding frames for chicken feature visualization
+  frameschicken = horzcat(frameChicken{:})
+  save('frameschikcen')
+  csvwrite('./output21/frameDog.csv', framesdog);
+  csvwrite('./output21/frameChicken.csv', frameschicken);
+ 
