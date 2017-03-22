@@ -10,5 +10,6 @@ feature10000<-t(feature10000)
 # observations, and it would get as much principal components. In this case, we would get 2000. Thus, we need not
 # to select the suitable number of principal components.
 pca <- prcomp(feature10000, scale = T)
-rot<- data.frame(pca$rotation)
-# write.csv(rot, "../output/rot.csv")
+rot<- (pca$rotation)[,1:100]
+feature_new<- feature10000 %*% rot
+write.csv(feature_new, "../output/feature_new.csv")
