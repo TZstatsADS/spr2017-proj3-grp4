@@ -9,6 +9,7 @@ feature10000<-t(feature10000)
 # prcomp can handle the high dimension problem that the number of predictors are much larger than the number of
 # observations, and it would get as much principal components. In this case, we would get 2000. Thus, we need not
 # to select the suitable number of principal components.
-pca <- prcomp(feature10000, scale = T)
-rot<- data.frame(pca$rotation)
-# write.csv(rot, "../output/rot.csv")
+pca <- prcomp(feature10000, scale = F)
+rot<- (pca$rotation)[,1:100]
+feature_new<- feature10000 %*% rot
+write.csv(feature_new, "../output/feature_new.csv")
