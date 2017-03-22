@@ -3,5 +3,5 @@ test.BP<- function(model, testdata) {
   return(pre.BP)
 }
 test.rf <- function(model,testdata) {
-  return(predict(model.rf, testdata, type = "class"))
+  return(predict(model, testdata, type = "class"))
 }
