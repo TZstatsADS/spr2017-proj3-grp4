@@ -1,43 +1,60 @@
-library(kernlab)
-library(e1071)
-library(rpart)
-library(class)
-library(gbm)
+############ gbm ######################
+packages.used=c("gbm", "caret")
 
-### Build the Trining function 
-Train = function(data, Y){
-  data$Y[1:1000] = 0
-  data$Y[1001:2000] = 1
-  norm2 = data
-  ####cleaning data####
-  norm2 <- subset(norm2, select=-c(X,X0))
-  x <- subset(norm2, select = -Y)
-  y <- subset(norm2, select = Y)
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+
+library(gbm)
+library(caret)
+
+train.baseline=function(train.data)
+{
+  gbm1=gbm(y~.,data=train.data,dist="adaboost",n.tree = 800,shrinkage=0.1)
+  n=gbm.perf(gbm1)
+  gbm2=gbm(y~.,data=train.data,dist="adaboost",n.tree = n,shrinkage=0.1)
+  return(list(gbm=gbm2,n=n))
+}
+
+############ BP network ######################
+train.BP<- function(traindata) {
+  library(DMwR)
+  library(nnet)
+  traindata$y<- as.factor(traindata$y)
+  model.nnet <- nnet(y ~ ., data = traindata, linout = F,
+                     size = 3, decay = 0.01, maxit = 200,
+                     trace = F, MaxNWts=5000)
+  return(model.nnet)
+}
+
+############ Random Forest ######################
+# First tune random forest model, tune parameter 'mtry'
+train.rf<- function(traindata) {
   
-  ##### PCA #########
-  pca <- prcomp(x,scale = T)
+  traindata$y<- as.factor(traindata$y)
+  y.index<- which(colnames(traindata)=="y")
+  library(randomForest)
+  bestmtry <- tuneRF(y= traindata$y, x= traindata[,-y.index], stepFactor=1.5, improve=1e-5, ntree=600)
+  best.mtry <- bestmtry[,1][which.min(bestmtry[,2])]
   
-  #select number of PC# 
-  pca_x = pca$x[,1:5]
-  
-  ### svm classification after PCA
-  # cross validation of 20 fold
-  tc <- tune.control(cross = 20)
-  Cs = c(.001,.01,.1,.5,1)
-  gammas = 10^(-2:2)
-  degres = c(0,1)
-  coef = c(0,1)
-  cv_svmTune <- tune.svm(pca_x, y =y, cost = Cs, gamma = gammas,degree = degres,coef0 = coef,
-                         tunecontrol = tc)
-  summary(cv_svmTune)
-  
-  ###### best adv model 
-  p = cv_svmTune$best.parameters
-  best.svm = svm(pca_x,y,cost = p[,4], gamma = p[,2],degree = p[,1],coef0 = p[,3])
-  
-  ####baseline model###
-  gbm_model <- gbm.fit(pca_x,as.vector(as.matrix(y)),distribution = "bernoulli", n.trees = 100)
-  return(list(gbm.base=gbm_model,svm.adv=best.svm))
+  model.rf <- randomForest(y ~ ., data = traindata, ntree=600, mtry=best.mtry, importance=T)
+  return(model.rf)
+}
+
+############ SVM ######################
+train.svm<- function(traindata) {
+  traindata$y<- as.factor(traindata$y)
+  model.svm<- svm(y~., data = traindata)
+  return(model.svm)
+}
+
+########### Build the Training function ##########
+Train <- function(data){
   
 }
 
