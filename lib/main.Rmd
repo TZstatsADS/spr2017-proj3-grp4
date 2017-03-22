@@ -10,31 +10,76 @@ label=read.csv("../data/labels.csv")
 
 source("../lib/train.baseline.r")
 source("../lib/test.baseline.r")
+
+source("../lib/train.bp.r")
+source("../lib/test.bp.r")
+
+source("../lib/train.BPrf.r")
+source("../lib/test.BPrf.r")
+
 ```
 
-#train and test
+#train and test 
 ```{r}
 all=data.frame(cbind(label,t(sift.features)))
-test.index1=c(1:200,1001:1200)
+test.index1=c(201:400,1201:1400)
 colnames(all)[1]="y"
 test=all[test.index1,]
+test.x=test[,-1]
 train=all[-test.index1,]
 ```
 
+
 #baseline
-```{r}
+```{r,warnings=F}
 baseline.model=train.baseline(train)
-baseline.pre=test.baseline(baseline.model,test)
+baseline.pre=test.baseline(baseline.model,test.x)
 table(baseline.pre,test$y)
+
+
 ```
 
-
-#advanced model
+#bp
 ```{r}
-source("../lib/train.bp.r")
-source("../lib/test.bp.r")
-advanced.model = train.bp(train)
-advanced.pre = test.bp(advanced.model, test)
-table(advanced.pre, test$y)
+bp.model=train.bp(train)
+bp.pre=test.bp(bp.model,test.x)
+table(bp.pre,test$y)
 ```
+#random forest
+```{r}
+rf.model=train.rf(train)
+model.rf <- randomForest(y ~ ., data = train, ntree=600, mtry=167, importance=T)
+rf.pre=test.rf(model.rf,test.x)
+table(rf.pre,test$y)
+```
+
+
+#svm
+```{r}
+
+
+```
+
+#majority vote
+```{r}
+pre=(as.numeric(baseline.pre)+as.numeric(as.character(rf.pre))+as.numeric(bp.pre))
+
+pre=ifelse((as.numeric(baseline.pre)+as.numeric(rf.pre)-1+as.numeric(bp.pre)+as.numeric(knn_result))>2,1,0)
+
+table(pre,test$y)
+as.numeric(as.character(knn_result))
+table(pre>=2,test$y)
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
