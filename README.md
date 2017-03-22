@@ -1,19 +1,19 @@
-# Project: Labradoodle or Fried Chicken? In Blakc and White. 
+# Project: Libra doodle or Fried Chicken? In Black and White. 
 ![image](figs/poodleKFC.jpg)
 
 ### [Full Project Description](doc/project3_desc.html)
 
 Term: Spring 2017
 
-+ Team #
++ Team #4
 + Team members
-	+ team member 1 Qingyuan Zhang
-	+ team member 2 Zhilin   Fan
-	+ team member 3 Yuxin    Zhu
-	+ team member 4 Yuping   Huang
-	+ team member 5 Zishuo   Li
+	+ team member 1 ([`Qingyuan Zhang`](https://github.com/amandazhang))
+	+ team member 2 ([`Zhilin   Fan`](https://github.com/zf2169))
+	+ team member 3 ([`Yuxin    Zhu`](https://github.com/yz2986))
+	+ team member 4 ([`Yuping   Huang`]())
+	+ team member 5 ([`Zishuo   Li`](https://github.com/ZishuoLi))
 
-+ Project summary: In this project, we created a classification engine for grayscale images of poodles versus images of fried chickens. 
++ Project summary: In this project, we created a classification engine for gray scale images of poodles versus images of fried chickens. 
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
