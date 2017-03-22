@@ -7,34 +7,59 @@ output: html_notebook
 ```{r}
 sift.features=read.csv("../data/sift_features.csv", header = T)
 label=read.csv("../data/labels.csv")
+
+source("../lib/train.baseline.r")
+source("../lib/test.baseline.r")
 ```
 
-#train n test
+#train and test
 ```{r}
-index=sample(1:2000,400,replace = F)
 all=data.frame(cbind(label,t(sift.features)))
+test.index1=c(1:200,1001:1200)
 colnames(all)[1]="y"
-test=all[index,]
-train=all[-index,]
+test=all[test.index1,]
+train=all[-test.index1,]
 ```
 
 #baseline
 ```{r}
-library(gbm)
-library(caret)
-gbm1=gbm(y~.,data=train,dist="adaboost",n.tree = 400,shrinkage = 0.1)
-n=gbm.perf(gbm1)
-
-confusionMatrix( predict(gbm1,train,n.trees=n)>0,train$y >0)$table
-confusionMatrix( predict(gbm1,test,n.trees = n)>0,test$y >0)$table
-
+baseline.model=train.baseline(train)
+baseline.pre=test.baseline(baseline.model,test)
+table(baseline.pre,test$y)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
 
 #tree depth=6
 ```{r}
-gbm2=gbm(y~.,data=train,dist="adaboost",n.tree = 100,shrinkage = 0.1,interaction.depth = 6)
+gbm2=gbm(y~.,data=all,dist="adaboost",n.tree = 100,shrinkage = 0.1,interaction.depth = 5)
 m=gbm.perf(gbm2)
 confusionMatrix( predict(gbm2,train,n.trees =m)>0,train$y >0)$table
 confusionMatrix( predict(gbm2,test,n.trees =m)>0,test$y >0)$table
 
+test.x=test[,-1]
+test.y=as.factor(test[,1])
+
+
+train(
+  test.x, 
+  test.y, 
+  method="gbm", 
+  tuneGrid=expand.grid(
+    n.trees=100,
+    interaction.depth=1:10,
+    shrinkage=.1,
+    n.minobsinnode=10
+    ), 
+  distribution="multinomial")
 ```
