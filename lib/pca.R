@@ -12,4 +12,5 @@ feature10000<-t(feature10000)
 pca <- prcomp(feature10000, scale = T)
 rot<- (pca$rotation)[,1:100]
 feature_new<- feature10000 %*% rot
+feature_new<- matrix(unlist(feature_new),2000,100)
 write.csv(feature_new, "../output/feature_new.csv")
