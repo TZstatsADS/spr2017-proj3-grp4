@@ -29,37 +29,12 @@ table(baseline.pre,test$y)
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-#tree depth=6
+#advanced model
 ```{r}
-gbm2=gbm(y~.,data=all,dist="adaboost",n.tree = 100,shrinkage = 0.1,interaction.depth = 5)
-m=gbm.perf(gbm2)
-confusionMatrix( predict(gbm2,train,n.trees =m)>0,train$y >0)$table
-confusionMatrix( predict(gbm2,test,n.trees =m)>0,test$y >0)$table
-
-test.x=test[,-1]
-test.y=as.factor(test[,1])
-
-
-train(
-  test.x, 
-  test.y, 
-  method="gbm", 
-  tuneGrid=expand.grid(
-    n.trees=100,
-    interaction.depth=1:10,
-    shrinkage=.1,
-    n.minobsinnode=10
-    ), 
-  distribution="multinomial")
+source("../lib/train.bp.r")
+source("../lib/test.bp.r")
+advanced.model = train.bp(train)
+advanced.pre = test.bp(advanced.model, test)
+table(advanced.pre, test$y)
 ```
+
