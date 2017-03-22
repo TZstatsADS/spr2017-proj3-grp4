@@ -1,5 +1,5 @@
 ############ BP network######################
-trian.BP<- function(traindata) {
+train.BP<- function(traindata) {
   library(DMwR)
   library(nnet)
 
