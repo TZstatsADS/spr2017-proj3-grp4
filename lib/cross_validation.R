@@ -1,4 +1,3 @@
-########################
 ### Cross Validation ###
 ########################
 
@@ -47,7 +46,7 @@ cv.function <- function(data, K){
     pre=ifelse(pre>=2,1,0)
     cv.error.vote[i] <- mean(pre != test.data$y)
   }			
-  cv.error<- data.frame(naseline.sift = mean(cv.error.baseline.sift),
+  cv.error<- data.frame(baseline.sift = mean(cv.error.baseline.sift),
                         baseline = mean(cv.error.baseline) ,BP = mean(cv.error.BP), 
                         rf = mean(cv.error.rf), svm = mean(cv.error.svm), 
                         logistic= mean(cv.error.log),vote= mean(cv.error.vote))
