@@ -1,0 +1,106 @@
+---
+title: "test"
+author: "Yuxin Zhu"
+date: "2017/3/23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#install packages
+```{r}
+packages.used=c("gbm", "caret","DMwR" ,"nnet","randomForest")
+
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+
+```
+
+#read data
+```{r,warning=F}
+sift.features=read.csv("../data/sift_features.csv", header = T)
+new.features=read.csv("../data/lbp.csv",header=F)
+
+label=read.csv("../data/labels.csv")
+
+source("../lib/train.r")
+source("../lib/test.r")
+
+```
+
+#train and test 
+```{r}
+all=data.frame(cbind(label,t(sift.features)))
+test.index=sample(1:2000,400,replace=F)
+colnames(all)[1]="y"
+test=all[test.index,]
+test.x=test[,-1]
+train=all[-test.index,]
+```
+
+
+#baseline
+```{r,warnings=F}
+system.time(baseline.model <- train.baseline(train))
+system.time(baseline.pre <- test.baseline(baseline.model,test.x))
+table(baseline.pre,test$y)
+
+```
+
+#new features
+```{r}
+new.data=data.frame(cbind(label,new.features))
+colnames(new.data)[1]="y"
+test=new.data[test.index,]
+test.x=test[,-1]
+train=new.data[-test.index,]
+```
+
+
+
+#baseline using new features
+```{r}
+system.time(baseline.model <- train.baseline(train))
+system.time(baseline.pre <- test.baseline(baseline.model,test.x))
+table(baseline.pre,test$y)
+```
+
+#bp
+```{r}
+
+system.time(bp.model <- train.bp(train))
+system.time(bp.pre <- test.bp(bp.model,test.x))
+table(bp.pre,test$y)
+```
+
+#random forest
+```{r}
+system.time(rf.model <- train.rf(train))
+system.time(rf.pre <- test.rf(rf.model,test.x))
+table(rf.pre,test$y)
+```
+
+
+#svm
+```{r}
+system.time(svm.model <- train.svm(train))
+system.time(svm.pre <- test.svm(svm.model,test.x))
+table(svm.pre,test$y)
+```
+
+#majority vote
+```{r}
+
+system.time(pre <- (as.numeric(as.character(bp.pre))+as.numeric(as.character(rf.pre))+as.numeric(as.character(svm.pre))))
+
+pre=ifelse(pre>=2,1,0)
+table(pre,test$y)
+```
