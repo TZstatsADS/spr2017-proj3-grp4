@@ -20,11 +20,7 @@ train.baseline=function(train.data)
 train.bp<- function(traindata) {
   traindata$y<- as.factor(traindata$y)
   model.nnet <- nnet(y ~ ., data = traindata, linout = F,
-<<<<<<< HEAD
                      size = 2, decay = 0.01, maxit = 200,
-=======
-                     size = 1, decay = 0.01, maxit = 200,
->>>>>>> origin/master
                      trace = F, MaxNWts=5000)
   return(model.nnet)
 }
