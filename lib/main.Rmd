@@ -45,10 +45,12 @@ train.sift=all[-test.index,]
 
 #baseline
 ```{r,warnings=F}
+start.time <- Sys.time()
 baseline.model=train.baseline(train.sift)
 baseline.pre=test.baseline(baseline.model,test.x.sift)
 table(baseline.pre,test.sift$y)
-
+end.time <- Sys.time()
+end.time - start.time
 
 ```
 
@@ -65,42 +67,65 @@ train=new.data[-test.index,]
 
 #baseline using new features
 ```{r}
+start.time <- Sys.time()
 baseline.model=train.baseline(train)
 baseline.pre=test.baseline(baseline.model,test.x)
 table(baseline.pre,test$y)
+end.time <- Sys.time()
+end.time - start.time
 ```
 
 #bp
 ```{r}
+start.time <- Sys.time()
+
 bp.model=train.bp(train)
 bp.pre=test.bp(bp.model,test.x)
 table(bp.pre,test$y)
+
+end.time <- Sys.time()
+end.time - start.time
 ```
 
 #random forest
 ```{r}
+start.time <- Sys.time()
+
 rf.model=train.rf(train)
 rf.pre=test.rf(rf.model,test.x)
 table(rf.pre,test$y)
+
+end.time <- Sys.time()
+end.time - start.time
+
 ```
 
 
 #svm
 ```{r}
+start.time <- Sys.time()
+
 source("../lib/train.r")
 svm.model=train.svm(train)
 svm.pre=test.svm(svm.model,test.x)
 table(svm.pre,test$y)
 
-
+end.time <- Sys.time()
+end.time - start.time
 
 ```
 
 #logistic
 ```{r}
+start.time <- Sys.time()
+
 log.model=train.log(train)
 log.pre=test.log(log.model, test.x)
 table(log.pre, test$y)
+
+end.time <- Sys.time()
+end.time - start.time
+
 ```
 
 
@@ -118,8 +143,14 @@ table(pre,test$y)
 
 #error rate
 ```{r}
+start.time <- Sys.time()
+
 source("../lib/cross_validation.R")
 cv.function(train, 5)
+
+end.time <- Sys.time()
+end.time - start.time
+
 ```
 
 
