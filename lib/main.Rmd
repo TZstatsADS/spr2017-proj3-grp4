@@ -62,6 +62,15 @@ test.x=test[,-1]
 train=new.data[-test.index,]
 ```
 
+
+
+#baseline using new features
+```{r}
+baseline.model=train.baseline(train)
+baseline.pre=test.baseline(baseline.model,test.x)
+table(baseline.pre,test$y)
+```
+
 #bp
 ```{r}
 bp.model=train.bp(train)
@@ -88,7 +97,8 @@ table(svm.pre,test$y)
 ```{r}
 pre=(as.numeric(as.character(bp.pre))+as.numeric(as.character(rf.pre))+as.numeric(as.character(svm.pre)))
 
-pre=ifelse(pre>2,1,0)
+pre=ifelse(pre>=2,1,0)
+
 
 
 table(pre,test$y)
