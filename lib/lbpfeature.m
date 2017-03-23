@@ -1,7 +1,7 @@
 function lbpfeature()
 conf.calDir = './' ; % calculating directory
 conf.dataDir = './images/' ; % data (image) directory 
-conf.outDir = './output4/'; % output directory
+conf.outDir = './output/'; % output directory
 conf.prefix = 'lbp_' ;
 conf.lbpPath = fullfile(conf.outDir, [conf.prefix 'feature.mat']);
 
