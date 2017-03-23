@@ -16,6 +16,6 @@ for a = 1:length(imname)
 end
 
 save(conf.lbpPath, 'lbp');
-csvwrite('./output4/lbp.csv',lbp);
+csvwrite('./output/lbp.csv',lbp);
 end
 
