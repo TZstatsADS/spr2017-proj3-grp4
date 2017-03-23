@@ -21,7 +21,7 @@ train.bp<- function(traindata) {
   traindata$y<- as.factor(traindata$y)
   model.nnet <- nnet(y ~ ., data = traindata, linout = F,
                      size = 1, decay = 0.01, maxit = 200,
-                     trace = F, MaxNWts=5000)
+                     trace = F, MaxNWts=6000)
   return(model.nnet)
 }
 
@@ -32,7 +32,7 @@ train.rf<- function(traindata) {
   traindata$y<- as.factor(traindata$y)
   y.index<- which(colnames(traindata)=="y")
   #bestmtry <- tuneRF(y= traindata$y, x= traindata[,-y.index], stepFactor=1.5, improve=1e-5, ntree=600)
-  best.mtry <- 237#bestmtry[,1][which.min(bestmtry[,2])]
+  best.mtry <- 200#bestmtry[,1][which.min(bestmtry[,2])]
   
   model.rf <- randomForest(y ~ ., data = traindata, ntree=600, mtry=best.mtry, importance=T)
   return(model.rf)
@@ -41,7 +41,7 @@ train.rf<- function(traindata) {
 ############ SVM ######################
 train.svm<- function(traindata) {
   traindata$y<- as.factor(traindata$y)
-  model.svm<- svm(y~., data = traindata)
+  model.svm<- svm(y~., data = traindata,cost=10)
   return(model.svm)
 }
 

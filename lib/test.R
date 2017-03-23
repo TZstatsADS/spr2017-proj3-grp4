@@ -3,6 +3,7 @@ library(caret)
 library(DMwR)
 library(nnet)
 library(randomForest)
+library(e1071)
 
 ############ gbm ######################
 

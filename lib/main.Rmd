@@ -25,6 +25,7 @@ if(length(packages.needed)>0){
 sift.features=read.csv("../data/sift_features.csv", header = T)
 new.features=read.csv("../output/feature_new.csv")
 new.features=new.features[,-1]
+lbp=read.csv("../data/lbp.csv", header = F)
 
 label=read.csv("../data/labels.csv")
 
@@ -55,7 +56,7 @@ table(baseline.pre,test$y)
 
 #new features
 ```{r}
-new.data=data.frame(cbind(label,new.features))
+new.data=data.frame(cbind(label,lbp))
 colnames(new.data)[1]="y"
 test=new.data[test.index,]
 test.x=test[,-1]
@@ -88,9 +89,13 @@ table(rf.pre,test$y)
 
 #svm
 ```{r}
+source("../lib/train.r")
 svm.model=train.svm(train)
 svm.pre=test.svm(svm.model,test.x)
 table(svm.pre,test$y)
+
+
+
 ```
 
 #majority vote
