@@ -31,3 +31,11 @@ test.svm <- function(model,test.data)
 {
   return(predict(model,test.data,type="class"))
 }
+
+############ Logistic ######################
+test.log <- function(model, test_data) 
+{
+  result<- predict(model,newdata =test_data,type = 'response')
+  fitted.results <- ifelse(result>0.5,1,0)
+  return(fitted.results)
+}

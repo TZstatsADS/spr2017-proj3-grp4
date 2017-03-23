@@ -23,8 +23,6 @@ if(length(packages.needed)>0){
 #read data
 ```{r,warning=F}
 sift.features=read.csv("../data/sift_features.csv", header = T)
-new.features=read.csv("../output/feature_new.csv")
-new.features=new.features[,-1]
 lbp=read.csv("../data/lbp.csv", header = F)
 
 label=read.csv("../data/labels.csv")
@@ -39,17 +37,17 @@ source("../lib/test.r")
 all=data.frame(cbind(label,t(sift.features)))
 test.index=sample(1:2000,400,replace=F)
 colnames(all)[1]="y"
-test=all[test.index,]
-test.x=test[,-1]
-train=all[-test.index,]
+test.sift=all[test.index,]
+test.x.sift=test.sift[,-1]
+train.sift=all[-test.index,]
 ```
 
 
 #baseline
 ```{r,warnings=F}
-baseline.model=train.baseline(train)
-baseline.pre=test.baseline(baseline.model,test.x)
-table(baseline.pre,test$y)
+baseline.model=train.baseline(train.sift)
+baseline.pre=test.baseline(baseline.model,test.x.sift)
+table(baseline.pre,test.sift$y)
 
 
 ```
@@ -98,9 +96,17 @@ table(svm.pre,test$y)
 
 ```
 
+#logistic
+```{r}
+log.model=train.log(train)
+log.pre=test.log(log.model, test.x)
+table(log.pre, test$y)
+```
+
+
 #majority vote
 ```{r}
-pre=(as.numeric(as.character(bp.pre))+as.numeric(as.character(rf.pre))+as.numeric(as.character(svm.pre)))
+pre=(as.numeric(as.character(bp.pre))+as.numeric(as.character(log.pre))+as.numeric(as.character(svm.pre)))
 
 pre=ifelse(pre>=2,1,0)
 
@@ -108,6 +114,12 @@ pre=ifelse(pre>=2,1,0)
 
 table(pre,test$y)
 
+```
+
+#error rate
+```{r}
+source("../lib/cross_validation.R")
+cv.function(train, 5)
 ```
 
 

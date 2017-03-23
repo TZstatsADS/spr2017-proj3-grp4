@@ -45,3 +45,10 @@ train.svm<- function(traindata) {
   return(model.svm)
 }
 
+############ Logistic ######################
+train.log <- function(train_data){
+  model.log <- glm(y~.,family = binomial(link="logit"),data=train_data)
+  return(model.log)
+}
+
+
