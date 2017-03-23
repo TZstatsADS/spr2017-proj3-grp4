@@ -41,7 +41,7 @@ train.rf<- function(traindata) {
 ############ SVM ######################
 train.svm<- function(traindata) {
   traindata$y<- as.factor(traindata$y)
-  model.svm<- svm(y~., data = traindata,cost=10)
+  model.svm<- svm(y~., data = traindata,cost=100, gamma=0.01)
   return(model.svm)
 }
 
