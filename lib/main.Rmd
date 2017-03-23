@@ -3,30 +3,44 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-#read data
+
+
+#install packages
 ```{r}
+packages.used=c("gbm", "caret","DMwR" ,"nnet","randomForest")
+
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+
+```
+
+#read data
+```{r,warning=F}
 sift.features=read.csv("../data/sift_features.csv", header = T)
+new.features=read.csv("../output/feature_new.csv")
+new.features=new.features[,-1]
+
 label=read.csv("../data/labels.csv")
 
-source("../lib/train.baseline.r")
-source("../lib/test.baseline.r")
-
-source("../lib/train.bp.r")
-source("../lib/test.bp.r")
-
-source("../lib/train.BPrf.r")
-source("../lib/test.BPrf.r")
+source("../lib/train.r")
+source("../lib/test.r")
 
 ```
 
 #train and test 
 ```{r}
 all=data.frame(cbind(label,t(sift.features)))
-test.index1=c(201:400,1201:1400)
+test.index=sample(1:2000,400,replace=F)
 colnames(all)[1]="y"
-test=all[test.index1,]
+test=all[test.index,]
 test.x=test[,-1]
-train=all[-test.index1,]
+train=all[-test.index,]
 ```
 
 
@@ -39,36 +53,45 @@ table(baseline.pre,test$y)
 
 ```
 
+#new features
+```{r}
+new.data=data.frame(cbind(label,new.features))
+colnames(new.data)[1]="y"
+test=new.data[test.index,]
+test.x=test[,-1]
+train=new.data[-test.index,]
+```
+
 #bp
 ```{r}
 bp.model=train.bp(train)
 bp.pre=test.bp(bp.model,test.x)
 table(bp.pre,test$y)
 ```
+
 #random forest
 ```{r}
 rf.model=train.rf(train)
-model.rf <- randomForest(y ~ ., data = train, ntree=600, mtry=167, importance=T)
-rf.pre=test.rf(model.rf,test.x)
+rf.pre=test.rf(rf.model,test.x)
 table(rf.pre,test$y)
 ```
 
 
 #svm
 ```{r}
-
-
+svm.model=train.svm(train)
+svm.pre=test.svm(svm.model,test.x)
+table(svm.pre,test$y)
 ```
 
 #majority vote
 ```{r}
-pre=(as.numeric(baseline.pre)+as.numeric(as.character(rf.pre))+as.numeric(bp.pre))
+pre=(as.numeric(as.character(bp.pre))+as.numeric(as.character(rf.pre))+as.numeric(as.character(svm.pre)))
 
-pre=ifelse((as.numeric(baseline.pre)+as.numeric(rf.pre)-1+as.numeric(bp.pre)+as.numeric(knn_result))>2,1,0)
+pre=ifelse(pre>2,1,0)
+
 
 table(pre,test$y)
-as.numeric(as.character(knn_result))
-table(pre>=2,test$y)
 
 ```
 
