@@ -1,49 +1,32 @@
-library(kernlab)
-library(e1071)
-library(rpart)
-library(class)
 library(gbm)
+library(caret)
+library(DMwR)
+library(nnet)
+library(randomForest)
 
-### Build the Test function 
-Test = function(new.data){
-  norm2_test = new.data
-  ####cleaning data####
-  norm2_test <- subset(norm2_test, select=-c(X,X0))
-  x_test <- norm2_test
-  
-  ##### PCA #########
-  pca_test <- prcomp(x_test,scale = T)
-  
-  # select the number of PC
-  pca_xtest = pca_test$x[,1:5]
-  
-  ######Testing Model Performance for SVM#####
-  pred_test <- predict(model$svm.adv,pca_xtest)
-  for (i in 1:2020){
-    if (pred_test[i] > 0.5){
-      norm2_test$pred_Categor_svm[i] = 0
-    }
-    else{
-      norm2_test$pred_Categor_svm[i] = 1
-    }
-  } 
-  
-  ######Testing Model Performance for GBM#####
-  pred_test_gbm <- predict(model$gbm.base,pca_xtest,n.trees = 100)
-  for (i in 1:2020){
-    if (pred_test_gbm[i] > 0){
-      norm2_test$pred_Categor_gbm[i] = 0
-    }
-    else{
-      norm2_test$pred_Categor_gbm[i] = 1
-    }
-  } 
-  results = as.data.frame(cbind(norm2_test$pred_Categor_svm,norm2_test$pred_Categor_gbm))
-  names(results) = c("svm.adv","gbm.base")
-  return = results
+############ gbm ######################
+
+test.baseline=function(model,test.data)
+{
+  prediction=ifelse(predict(model$gbm,test.data,n.trees=model$n)>0,1,0)
+  return(prediction)
 }
 
-# read test feature data#
-newdat = read.csv(file.choose(), header = T)
-# output predicted result#
-result = Test(newdat)
+############ BP network ######################
+test.bp=function(model,test.data)
+{
+  pre.nnet <- predict(model, test.data, type = "class")
+  return(pre.nnet)
+}
+
+############ Random Forest ######################
+test.rf <- function(model,test.data) {
+  return(predict(model, test.data, type = "class"))
+}
+
+
+############ SVM ######################
+test.svm <- function(model,test.data)
+{
+  return(predict(model,test.data,type="class"))
+}
