@@ -14,11 +14,13 @@ Term: Spring 2017
 	+ team member 5 ([`Zishuo   Li`](https://github.com/ZishuoLi))
 
 + Project summary: In this project, we utilized deep learning packages in matlab to do feature extraction from given 2000 gray scale images of poodles and fried chicken. 
-Then we applied machine learning tools to help build good classifier and make prediction on new images. We used the given 5000-dimensional SIFT features at our first attempt, but we only got 80% accuracy rate and the execution time was not satisfying. After some attempts, we used LBP(Local Binary Patterns) to extract features. The processing time of 2000 images is 210s and the dimension of feature matrix is 2000*59. We used GBM, BP Neural Networks, Random Forest, SVM and Logistic Regression for advanced models. 
+Then we applied machine learning tools to help build good classifier and make prediction on new images. We used the given 5000-dimensional SIFT features at our first attempt, but we only got 80% accuracy rate and the execution time was not satisfying. After some attempts, we used LBP(Local Binary Patterns) to extract features. The processing time of 2000 images is 210s and the dimension of feature matrix is only 2000*59. We used GBM, BP Neural Networks, Random Forest, SVM and Logistic Regression for advanced models. 
 Here is a summary of our models. 
 ![image](figs/summary.png)
 
 We chose Majority Vote(BP Netural Networks, SVM, Logistic Regression) as our final model. Since training time of each model is very short, time won't be a problem for majority vote. Although we sacrifice little accuracy, We can get a more robust model.
+
+In general, the error rate of our Baseline model is 27%, and that of our final model is 13%. And thus, we have successfully improved our model without scarificing computational efficiency. 
 
 **Reproducibility**: To reproduce our work, set your working directory onto `doc` folder, then run the `main.rmd` file.
 
