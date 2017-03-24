@@ -19,7 +19,8 @@ Here is a summary of our models.
 ![image](figs/summary.png)
 
 We chose Majority Vote(BP Netural Networks, SVM, Logistic Regression) as our final model. Since training time of each model is very short, time won't be a problem for majority vote. Although we sacrifice little accuracy, We can get a more robust model.
-	
+
+**Reproducibility**: To reproduce our work, set your working directory onto 'doc' folder, then run the main.rmd file.
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
