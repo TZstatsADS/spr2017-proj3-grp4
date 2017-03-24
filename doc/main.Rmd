@@ -2,9 +2,9 @@
 title: "Puppy or Fried Chicken?"
 author: 'Team #4'
 output:
-  html_document: default
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
+  html_document: default
 ---
 
 
@@ -12,7 +12,7 @@ output:
 ####In this project, we created a classifier for grey images of puppies versus images of fried chickens. We tried different features (SIFT, LBP) and different classifiers (GBM, BP Neural Networks, SVM, Random Forest, Logistic Regression and Majority Vote). When pursuing low error rate, we also keep an eye on processing time.
 
 ###Install Packages
-```{r}
+```{r,message=F}
 packages.used=c("gbm", "caret","DMwR" ,"nnet","randomForest","EBImage","e1071")
 
 # check packages that need to be installed.
@@ -27,7 +27,7 @@ if(length(packages.needed)>0){
 ```
 
 ###Read Data
-```{r,warning=F}
+```{r,warning=F,message=F}
 sift.features=read.csv("../data/sift_features.csv", header = T)
 lbp=read.csv("../data/lbp.csv", header = F)
 label=read.csv("../data/labels.csv")
@@ -56,10 +56,8 @@ baseline.pre=test.baseline(baseline.model,test.x.sift)
 table(baseline.pre,test.sift$y)
 ```
 #Other models + SIFT
-####We tried to apply other models on 5000-dimensional SIFT features. When the accuracy rate increased to ~80%, the processing time increased dramatically. So we used PCA to reduce the dimensional of SIFT features. However, when the dimension decreased to 500, the results of models didn’t seem satisfying. Thus, we started to explore other features.
+####We tried to apply other models on 5000-dimensional SIFT features. When the accuracy rate increased to ~80%, the processing time increased dramatically. So we used PCA to reduce the dimension of SIFT features. However, when the dimension decreased to 500, the results of models didn’t seem satisfying. Thus, we started to explore other features.
 
-#
-#
 
 #Local Binary Patterns (LBP)
 ####•	Divide the examined window into cells (e.g. 16x16 pixels for each cell).
@@ -102,7 +100,7 @@ table(bp.pre,test$y)
 ##Random Forest + LBP
 ####Tune Parameter: m.try=15
 ```{r,warning=F,echo=F}
-system.time(rf.model <- train.rf(train))
+rf.model <- train.rf(train)
 rf.pre=test.rf(rf.model,test.x)
 table(rf.pre,test$y)
 ```
@@ -111,14 +109,14 @@ table(rf.pre,test$y)
 ##SVM + LBP
 ####Tune Parameters: cost=10, gamma=0.01
 ```{r}
-system.time(svm.model <- train.svm(train))
+svm.model <- train.svm(train)
 svm.pre=test.svm(svm.model,test.x)
 table(svm.pre,test$y)
 ```
 
 ##Logistic Regression + LBP
 ```{r}
-system.time(log.model <- train.log(train))
+log.model <- train.log(train)
 log.pre=test.log(log.model, test.x)
 table(log.pre, test$y)
 ```
@@ -132,27 +130,26 @@ table(pre,test$y)
 ```
 
 #Cross Validation Error Rate
-```{r,echo=F}
+```{r,echo=F,include=F}
 source("../lib/cross_validation.R")
 cv.error=cv.function(train, 5)
 ```
 
 #Final Train & Time
-```{r,echo=F}
+```{r,echo=F,include=F}
 a=system.time(baseline <- train.baseline(all))
 b=system.time(gbm <- train.baseline(new.data))
 c=system.time(bp <- train.bp(new.data))
 d=system.time(rf <- train.rf(new.data))
 e=system.time(svm <- train.svm(new.data))
 f=system.time(logistic <- train.log(new.data))
-time=list(baseline.sift=a,gbm=b,bp=c,rf=d,svm=e,logistic=f,vote=NA)
+time=list(baseline=a,gbm=b,bp=c,rf=d,svm=e,logistic=f,vote=NA)
 ```
 
 
 ```{r}
-library(EBImage)
-summary=readImage("../figs/summary.png")
-display(summary)
+cv.error
+time
 ```
 
 

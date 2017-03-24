@@ -5,7 +5,6 @@ cv.function <- function(data, K){
   
   n <- nrow(data)
   n.fold <- floor(n/K)
-  set.seed(1)
   s <- sample(rep(1:K, c(rep(n.fold, K-1), n-(K-1)*n.fold)))
   cv.error.baseline.sift <- rep(NA, K)
   cv.error.baseline <- rep(NA, K)
@@ -47,7 +46,7 @@ cv.function <- function(data, K){
     pre=ifelse(pre>=2,1,0)
     cv.error.vote[i] <- mean(pre != test.data$y)
   }			
-  cv.error<- list(baseline = mean(cv.error.baseline.sift),
+  cv.error<- data.frame(baseline = mean(cv.error.baseline.sift),
                         gbm = mean(cv.error.baseline) ,bp = mean(cv.error.BP), 
                         rf = mean(cv.error.rf), svm = mean(cv.error.svm), 
                         logistic= mean(cv.error.log),vote= mean(cv.error.vote))
