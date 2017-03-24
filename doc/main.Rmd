@@ -116,7 +116,7 @@ svm.pre=test.svm(svm.model,test.x)
 table(svm.pre,test$y)
 ```
 
-##Logistic Regression+ LBP
+##Logistic Regression + LBP
 ```{r}
 system.time(log.model <- train.log(train))
 log.pre=test.log(log.model, test.x)
