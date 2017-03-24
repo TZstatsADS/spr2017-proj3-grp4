@@ -1,192 +1,161 @@
 ---
-title: "Project 3 - Example Main Script"
-author: "Yuting Ma, Tian Zheng"
-date: "February 24, 2016"
+title: "Puppy or Fried Chicken?"
+author: 'Team #4'
 output:
-  pdf_document: default
   html_document: default
+  html_notebook: default
+  pdf_document: default
 ---
-In your final repo, there should be an R markdown file that organizes **all computational steps** for evaluating your proposed image classification framework. 
 
-This file is currently a template for running evaluation experiments of image analysis (or any predictive modeling). You should update it according to your codes but following precisely the same structure. 
+
+#Summary:
+####In this project, we created a classifier for grey images of puppies versus images of fried chickens. We tried different features (SIFT, LBP) and different classifiers (GBM, BP Neural Networks, SVM, Random Forest, Logistic Regression and Majority Vote). When pursuing low error rate, we also keep an eye on processing time.
+
+###Install Packages
+```{r}
+packages.used=c("gbm", "caret","DMwR" ,"nnet","randomForest","EBImage","e1071")
+
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+
+```
+
+###Read Data
+```{r,warning=F}
+sift.features=read.csv("../data/sift_features.csv", header = T)
+lbp=read.csv("../data/lbp.csv", header = F)
+label=read.csv("../data/labels.csv")
+
+source("../lib/train.r")
+source("../lib/test.r")
+```
+
+###Train and Validate set 
+```{r}
+all=data.frame(cbind(label,t(sift.features)))
+set.seed(1)
+test.index=sample(1:2000,400,replace=F)
+colnames(all)[1]="y"
+test.sift=all[test.index,]
+test.x.sift=test.sift[,-1]
+train.sift=all[-test.index,]
+```
+
+
+#Baseline: GBM + SIFT
+####Tune parameters:  n.trees=113, shrinkage=0.1
+```{r,warnings=F,echo=F}
+baseline.model=train.baseline(train.sift)
+baseline.pre=test.baseline(baseline.model,test.x.sift)
+table(baseline.pre,test.sift$y)
+```
+#Other models + SIFT
+####We tried to apply other models on 5000-dimensional SIFT features. When the accuracy rate increased to ~80%, the processing time increased dramatically. So we used PCA to reduce the dimensional of SIFT features. However, when the dimension decreased to 500, the results of models didn’t seem satisfying. Thus, we started to explore other features.
+
+#
+#
+
+#Local Binary Patterns (LBP)
+####•	Divide the examined window into cells (e.g. 16x16 pixels for each cell).
+####•	For each pixel in a cell, compare the pixel to each of its 8 neighbors
+####•	Where the center pixel's value is greater than the neighbor's value, write "0". Otherwise, write "1". This gives an 8-digit binary number.
+####•	Compute the histogram over the cell. This histogram can be seen as a 256-dimensional feature vector.
+####•	Optionally normalize the histogram to 59-dimensional feature vector.
+####•	Concatenate histograms of all cells. This gives a feature vector for the entire window.
+
+
+####Then we extracted LBP features in MATLAB. The processing time of 2000 images is 210s. The column dimension of the result feature matrix is 59.
+
 
 ```{r}
-if(!require("EBImage")){
-  source("https://bioconductor.org/biocLite.R")
-  biocLite("EBImage")
-}
-
-if(!require("gbm")){
-  install.packages("gbm")
-}
-
-library("EBImage")
-library("gbm")
+new.data=data.frame(cbind(label,lbp))
+colnames(new.data)[1]="y"
+test=new.data[test.index,]
+test.x=test[,-1]
+train=new.data[-test.index,]
 ```
 
-### Step 0: specify directories.
 
-Set the working directory to the image folder. Specify the training and the testing set. For data without an independent test/validation set, you need to create your own testing data by random subsampling. In order to obain reproducible results, set.seed() whenever randomization is used. 
 
-```{r wkdir, eval=FALSE}
-setwd("~/Documents/spr2017-proj3-grp4")
-# here replace it with your own path or manually set it in RStudio to where this rmd file is located. 
+#GBM + LBP
+####Tune parameters:  n.trees=146, shrinkage=0.1
+```{r,echo=F}
+gbm.model=train.baseline(train)
+gbm.pre=test.baseline(gbm.model,test.x)
+table(gbm.pre,test$y)
 ```
-
-Provide directories for raw images. Training set and test set should be in different subfolders. 
+#Advanced Models + LBP
+##BP Neural Networks + LBP
+####Tune Parameters: size = 1, decay = 0.01
 ```{r}
-experiment_dir <- "../data/zipcode/" # This will be modified for different data sets.
-img_train_dir <- paste(experiment_dir, "train/", sep="")
-img_test_dir <- paste(experiment_dir, "test/", sep="")
+bp.model=train.bp(train)
+bp.pre=test.bp(bp.model,test.x)
+table(bp.pre,test$y)
 ```
 
-### Step 1: set up controls for evaluation experiments.
-
-In this chunk, ,we have a set of controls for the evaluation experiments. 
-
-+ (T/F) cross-validation on the training set
-+ (number) K, the number of CV folds
-+ (T/F) process features for training set
-+ (T/F) run evaluation on an independent test set
-+ (T/F) run evaluation on an independent test set
-
-```{r exp_setup}
-run.cv=TRUE # run cross-validation on the training set
-K <- 5  # number of CV folds
-run.feature.train=TRUE # process features for training set
-run.test=TRUE # run evaluation on an independent test set
-run.feature.test=TRUE # process features for test set
+##Random Forest + LBP
+####Tune Parameter: m.try=15
+```{r,warning=F,echo=F}
+system.time(rf.model <- train.rf(train))
+rf.pre=test.rf(rf.model,test.x)
+table(rf.pre,test$y)
 ```
 
-Using cross-validation or independent test set evaluation, we compare the performance of different classifiers or classifiers with different specifications. In this example, we use GBM with different `depth`. In the following chunk, we list, in a vector, setups (in this case, `depth`) corresponding to models that we will compare. In your project, you maybe comparing very different classifiers. You can assign them numerical IDs and labels specific to your project. 
 
-```{r model_setup}
-model_values <- seq(3, 11, 2)
-model_labels = paste("GBM with depth =", model_values)
+##SVM + LBP
+####Tune Parameters: cost=10, gamma=0.01
+```{r}
+system.time(svm.model <- train.svm(train))
+svm.pre=test.svm(svm.model,test.x)
+table(svm.pre,test$y)
 ```
 
-### Step 2: import training images class labels.
-
-For the example of zip code digits, we code digit 9 as "1" and digit 7 as "0" for binary classification.
-
-```{r train_label}
-label_train <- read.table(paste(experiment_dir, "train_label.txt", sep=""),
-                          header=F)
-label_train <- as.numeric(unlist(label_train) == "9")
+##Logistic Regression+ LBP
+```{r}
+system.time(log.model <- train.log(train))
+log.pre=test.log(log.model, test.x)
+table(log.pre, test$y)
 ```
 
-### Step 3: construct visual feature
 
-For this simple example, we use the row averages of raw pixel values as the visual features. Note that this strategy **only** works for images with the same number of rows. For some other image datasets, the feature function should be able to handle heterogeneous input images. Save the constructed features to the output subfolder.
-
-`feature.R` should be the wrapper for all your feature engineering functions and options. The function `feature( )` should have options that correspond to different scenarios for your project and produces an R object that contains features that are required by all the models you are going to evaluate later. 
-
-```{r feature}
-source("../lib/feature.R")
-
-tm_feature_train <- NA
-if(run.feature.train){
-  tm_feature_train <- system.time(dat_train <- feature(img_train_dir, 
-                                                       "train", 
-                                                       data_name="zip", 
-                                                       export=TRUE))
-}
-
-tm_feature_test <- NA
-if(run.feature.test){
-  tm_feature_test <- system.time(dat_test <- feature(img_test_dir, 
-                                                     "test", 
-                                                     data_name="zip", 
-                                                     export=TRUE))
-}
-
-#save(dat_train, file="./output/feature_train.RData")
-#save(dat_test, file="./output/feature_test.RData")
+##Majority Vote (NN, SVM, Log) + LBP
+```{r}
+pre=(as.numeric(as.character(bp.pre))+as.numeric(as.character(log.pre))+as.numeric(as.character(svm.pre)))
+pre=ifelse(pre>=2,1,0)
+table(pre,test$y)
 ```
 
-### Step 4: Train a classification model with training images
-Call the train model and test model from library. 
-
-`train.R` and `test.R` should be wrappers for all your model training steps and your classification/prediction steps. 
-+ `train.R`
-  + Input: a path that points to the training set features.
-  + Input: an R object of training sample labels.
-  + Output: an RData file that contains trained classifiers in the forms of R objects: models/settings/links to external trained configurations.
-+ `test.R`
-  + Input: a path that points to the test set features.
-  + Input: an R object that contains a trained classifiers.
-  + Output: an R object of class label predictions on the test set. If there are multiple classifiers under evaluation, there should be multiple sets of label predictions. 
-```{r loadlib}
-source("../lib/train.R")
-source("../lib/test.R")
-```
-
-#### Model selection with cross-validation
-* Do model selection by choosing among different values of training model parameters, that is, the interaction depth for GBM in this example. 
-```{r runcv, message=FALSE, warning=FALSE}
+#Cross Validation Error Rate
+```{r,echo=F}
 source("../lib/cross_validation.R")
-
-if(run.cv){
-  err_cv <- array(dim=c(length(model_values), 2))
-  for(k in 1:length(model_values)){
-    cat("k=", k, "\n")
-    err_cv[k,] <- cv.function(dat_train, label_train, model_values[k], K)
-  }
-  save(err_cv, file="../output/err_cv.RData")
-}
+cv.error=cv.function(train, 5)
 ```
 
-Visualize cross-validation results. 
-
-```{r cv_vis}
-if(run.cv){
-  load("../output/err_cv.RData")
-  #pdf("../fig/cv_results.pdf", width=7, height=5)
-  plot(model_values, err_cv[,1], xlab="Interaction Depth", ylab="CV Error",
-       main="Cross Validation Error", type="n", ylim=c(0, 0.25))
-  points(model_values, err_cv[,1], col="blue", pch=16)
-  lines(model_values, err_cv[,1], col="blue")
-  arrows(model_values, err_cv[,1]-err_cv[,2], model_values, err_cv[,1]+err_cv[,2], 
-        length=0.1, angle=90, code=3)
-  #dev.off()
-}
+#Final Train & Time
+```{r,echo=F}
+a=system.time(baseline <- train.baseline(all))
+b=system.time(gbm <- train.baseline(new.data))
+c=system.time(bp <- train.bp(new.data))
+d=system.time(rf <- train.rf(new.data))
+e=system.time(svm <- train.svm(new.data))
+f=system.time(logistic <- train.log(new.data))
+time=list(baseline.sift=a,gbm=b,bp=c,rf=d,svm=e,logistic=f,vote=NA)
 ```
 
 
-* Choose the "best"" parameter value
-```{r best_model}
-model_best=model_values[1]
-if(run.cv){
-  model_best <- model_values[which.min(err_cv[,1])]
-}
-
-par_best <- list(depth=model_best)
+```{r}
+library(EBImage)
+summary=readImage("../figs/summary.png")
+display(summary)
 ```
 
-* Train the model with the entire training set using the selected model (model parameter) via cross-validation.
-```{r final_train}
-tm_train=NA
-tm_train <- system.time(fit_train <- train(dat_train, label_train, par_best))
-save(fit_train, file="../output/fit_train.RData")
-```
 
-### Step 5: Make prediction 
-Feed the final training model with the completely holdout testing data. 
-```{r test}
-tm_test=NA
-if(run.test){
-  load(file=paste0("../output/feature_", "zip", "_", "test", ".RData"))
-  load(file="../output/fit_train.RData")
-  tm_test <- system.time(pred_test <- test(fit_train, dat_test))
-  save(pred_test, file="../output/pred_test.RData")
-}
-```
 
-### Summarize Running Time
-Prediction performance matters, do does the running times for constructing features and for training the model, especially when the computation resource is limited. 
-```{r running_time}
-cat("Time for constructing training features=", tm_feature_train[1], "s \n")
-cat("Time for constructing testing features=", tm_feature_test[1], "s \n")
-cat("Time for training model=", tm_train[1], "s \n")
-cat("Time for making prediction=", tm_test[1], "s \n")
-```
+#Final Model
+####We choose Majority Vote as our final model. Since training time of each model is very short, time won't be a problem for majority vote. Although we sacrifice little accuracy, We can get a more robust model.
