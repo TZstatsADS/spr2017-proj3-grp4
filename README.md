@@ -1,4 +1,4 @@
-# Project: Labradoodle or Fried Chicken? In Black and White. 
+# Project: Image Recognition: Labradoodle or Fried Chicken? 
 ![image](figs/poodleKFC.jpg)
 
 ### [Full Project Description](doc/project3_desc.html)
