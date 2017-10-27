@@ -14,7 +14,12 @@ Term: Spring 2017
 	+ team member 5 ([`Zishuo   Li`](https://github.com/ZishuoLi))
 
 + Project summary: In this project, we utilized deep learning packages in matlab to do feature extraction from given 2000 gray scale images of poodles and fried chicken. 
-Then we applied machine learning tools to help build good classifier and make prediction on new images. We used the given 5000-dimensional SIFT features at our first attempt, but we only got 80% accuracy rate and the execution time was not satisfying. After some attempts, we used LBP(Local Binary Patterns) to extract features. The processing time of 2000 images is 210s and the dimension of feature matrix is only 2000*59. We used GBM, BP Neural Networks, Random Forest, SVM and Logistic Regression for advanced models. 
+Then we applied machine learning tools to help build good classifier and make prediction on new images. 
+
+We used the given 5000-dimensional SIFT features at our first attempt, but we only got 80% accuracy rate and the execution time was not satisfying. After some attempts, we used LBP(Local Binary Patterns) to extract features. The processing time of 2000 images is 210s and the dimension of feature matrix is only 2000*59. 
+
+We used GBM, BP Neural Networks, Random Forest, SVM and Logistic Regression for advanced models. 
+
 Here is a summary of our models. 
 ![image](figs/summary.png)
 
